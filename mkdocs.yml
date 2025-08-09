@@ -1,0 +1,52 @@
+site_name: System Due Diligence Docs
+site_description: External-ready documentation for architecture, security, and operations
+site_url: https://example.com/docs
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.tracking
+    - toc.integrate
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+markdown_extensions:
+  - admonition
+  - footnotes
+  - def_list
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+nav:
+  - Home: index.md
+  - 01. System Overview: 01-system-overview.md
+  - 02. Architecture: 02-architecture.md
+  - 03. Data Model: 03-data-model.md
+  - 04. APIs: 04-apis.md
+  - 05. Security & Compliance: 05-security.md
+  - 06. Infrastructure & Deployment: 06-infra-deployment.md
+  - 07. Observability & SRE: 07-observability.md
+  - 08. SDLC & QA: 08-sdlc.md
+  - 09. Business Continuity & DR: 09-bcdr.md
+  - 10. Privacy & Data Handling: 10-privacy-data-handling.md
+  - 11. Third Parties: 11-third-parties.md
+  - 12. Risk Register: 12-risk-register.md
+  - Appendix:
+      - SBOM: appendix/SBOM.md
+      - Changelog Template: appendix/CHANGELOG.md
+      - Glossary: appendix/Glossary.md
+extra:
+  generator: false
