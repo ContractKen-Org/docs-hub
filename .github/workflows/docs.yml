@@ -1,0 +1,70 @@
+name: Build & Publish DD Docs
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"   # weekly refresh (Mon 09:30 IST)
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout docs hub
+        uses: actions/checkout@v4
+      # Checkout other repos (private -> needs a PAT with repo read)
+      - name: Checkout frontend
+        uses: actions/checkout@v4
+        with:
+          repository: YOURORG/your-frontend-repo
+          path: _frontend
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          repository: YOURORG/your-backend-repo
+          path: _backend
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+      # Optional: generate or copy artifacts into docs/
+      # Example: copy OpenAPI files if your repos export them
+      - name: Collect OpenAPI specs
+        run: |
+          mkdir -p docs/apis
+          # adjust paths to where your specs live
+          [ -f _backend/openapi.json ] && cp _backend/openapi.json docs/apis/backend-openapi.json || true
+          [ -f _frontend/openapi.json ] && cp _frontend/openapi.json docs/apis/frontend-openapi.json || true
+      # Optional: generate SBOMs (containers/directories) with Syft
+      - name: Generate SBOMs
+        uses: anchore/syft-action@v0.17.0
+        with:
+          path: _backend
+          output: cyclonedx-json
+          upload-release-assets: false
+        continue-on-error: true
+      - name: Move SBOM into docs
+        run: |
+          mkdir -p docs/appendix
+          if compgen -G "sbom*.json" > /dev/null; then mv sbom*.json docs/appendix/; fi
+      # Build MkDocs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install mkdocs mkdocs-material
+      - run: mkdocs build --strict
+      # Prepare Pages artifact
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
